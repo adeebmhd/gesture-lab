@@ -3,23 +3,24 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Gesture Lab — webcam hand tracking</title>
+<title>Gesture Lab — hands & faces, tracked live</title>
 <link rel="stylesheet" href="styles.css" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>" />
 </head>
 <body>
-<div class="aurora" aria-hidden="true"></div>
+<div class="aurora" id="aurora" aria-hidden="true"></div>
 
 <header class="topbar">
   <div class="brand">
     <span class="brand-mark">✋</span>
     <div class="brand-text">
       <h1>Gesture Lab</h1>
-      <p>Real-time hand tracking, straight from your webcam</p>
+      <p>Hand gestures and facial expressions, tracked live in your browser</p>
     </div>
   </div>
   <div class="topbar-actions">
     <button id="mirrorBtn" class="ghost" type="button" aria-pressed="true">Mirror: on</button>
+    <button id="snapBtn" class="ghost" type="button" disabled>Snapshot</button>
     <button id="cameraBtn" class="primary" type="button">Start camera</button>
   </div>
 </header>
@@ -28,6 +29,7 @@
   <section class="stage">
     <div class="stage-inner" id="stageInner">
       <video id="video" playsinline muted autoplay></video>
+      <canvas id="trail"></canvas>
       <canvas id="overlay"></canvas>
 
       <div class="stage-empty" id="stageEmpty">
@@ -38,7 +40,10 @@
 
       <div class="hud">
         <span class="pill" id="statusPill"><i class="dot"></i><span id="statusText">Idle</span></span>
-        <span class="pill" id="fpsPill">0 fps</span>
+        <span class="hud-right">
+          <span class="pill" id="moodPill">😐 Neutral</span>
+          <span class="pill" id="fpsPill">0 fps</span>
+        </span>
       </div>
 
       <div class="gesture-badge" id="gestureBadge" hidden>
@@ -46,12 +51,15 @@
         <span class="gesture-badge-name" id="badgeName">—</span>
       </div>
     </div>
-    <p class="hint">Your video is processed locally in this tab — nothing is uploaded or recorded.</p>
+    <div class="stage-bar">
+      <span>Everything is processed locally — nothing is uploaded or recorded.</span>
+      <span class="keys"><kbd>S</kbd> snapshot <kbd>D</kbd> draw <kbd>M</kbd> mirror</span>
+    </div>
   </section>
 
   <aside class="panel">
     <div class="card gesture-card">
-      <div class="card-label">Detected gesture</div>
+      <div class="card-label">Gesture</div>
       <div class="gesture-hero">
         <span class="gesture-emoji" id="gestureEmoji">🖐️</span>
         <div>
@@ -63,6 +71,24 @@
         <span class="meter-label">Pinch</span>
         <div class="meter"><div class="meter-fill" id="pinchFill"></div></div>
         <span class="meter-value" id="pinchValue">0%</span>
+      </div>
+      <div class="history" id="history" aria-label="Recent gestures"></div>
+    </div>
+
+    <div class="card expression-card">
+      <div class="card-label">Expression</div>
+      <div class="gesture-hero">
+        <span class="gesture-emoji" id="faceEmoji">😐</span>
+        <div>
+          <div class="gesture-name" id="faceName">No face yet</div>
+          <div class="gesture-sub" id="faceSub">Look towards the camera</div>
+        </div>
+      </div>
+      <div class="bars">
+        <div class="bar-row"><span>Smile</span><div class="meter"><div class="meter-fill" id="barSmile"></div></div></div>
+        <div class="bar-row"><span>Jaw open</span><div class="meter"><div class="meter-fill" id="barJaw"></div></div></div>
+        <div class="bar-row"><span>Blink</span><div class="meter"><div class="meter-fill" id="barBlink"></div></div></div>
+        <div class="bar-row"><span>Kiss</span><div class="meter"><div class="meter-fill" id="barKiss"></div></div></div>
       </div>
     </div>
 
@@ -77,14 +103,28 @@
       </div>
       <div class="stats-row">
         <div class="stat"><span class="stat-value" id="handsValue">0</span><span class="stat-label">hands</span></div>
-        <div class="stat"><span class="stat-value" id="fingerValue">0</span><span class="stat-label">fingers up</span></div>
+        <div class="stat"><span class="stat-value" id="faceValue">0</span><span class="stat-label">faces</span></div>
         <div class="stat"><span class="stat-value" id="confValue">—</span><span class="stat-label">confidence</span></div>
       </div>
     </div>
 
+    <div class="card playground-card">
+      <div class="card-label">Playground</div>
+      <div class="playground">
+        <button id="drawBtn" class="ghost small" type="button" aria-pressed="false">Air draw: off</button>
+        <button id="meshBtn" class="ghost small" type="button" aria-pressed="true">Face mesh: on</button>
+        <button id="clearBtn" class="ghost small" type="button">Clear drawing</button>
+        <button id="snapBtn2" class="ghost small" type="button" disabled>Save snapshot</button>
+      </div>
+      <p class="play-hint">Turn on <strong>Air draw</strong>, then pinch your thumb and index finger to draw in the air. Make a fist to clear.</p>
+    </div>
+
     <div class="card legend-card">
-      <div class="card-label">Gestures it recognises</div>
-      <ul class="legend" id="legend"></ul>
+      <div class="card-label">What it recognises</div>
+      <div class="legend-columns">
+        <ul class="legend" id="legend"></ul>
+        <ul class="legend" id="faceLegend"></ul>
+      </div>
     </div>
   </aside>
 </main>
