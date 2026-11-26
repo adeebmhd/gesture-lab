@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gesture Lab — webcam hand tracking</title>
+<link rel="stylesheet" href="styles.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✋</text></svg>" />
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">✋</span>
+    <div class="brand-text">
+      <h1>Gesture Lab</h1>
+      <p>Real-time hand tracking, straight from your webcam</p>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button id="mirrorBtn" class="ghost" type="button" aria-pressed="true">Mirror: on</button>
+    <button id="cameraBtn" class="primary" type="button">Start camera</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="stage">
+    <div class="stage-inner" id="stageInner">
+      <video id="video" playsinline muted autoplay></video>
+      <canvas id="overlay"></canvas>
+
+      <div class="stage-empty" id="stageEmpty">
+        <div class="stage-empty-icon">🎥</div>
+        <p id="emptyText">Camera is off. Press <strong>Start camera</strong> and allow access to begin.</p>
+        <a id="newTabLink" class="ghost small hidden" href="." target="_blank" rel="noopener">Open in a new tab ↗</a>
+      </div>
+
+      <div class="hud">
+        <span class="pill" id="statusPill"><i class="dot"></i><span id="statusText">Idle</span></span>
+        <span class="pill" id="fpsPill">0 fps</span>
+      </div>
+
+      <div class="gesture-badge" id="gestureBadge" hidden>
+        <span class="gesture-badge-emoji" id="badgeEmoji">✋</span>
+        <span class="gesture-badge-name" id="badgeName">—</span>
+      </div>
+    </div>
+    <p class="hint">Your video is processed locally in this tab — nothing is uploaded or recorded.</p>
+  </section>
+
+  <aside class="panel">
+    <div class="card gesture-card">
+      <div class="card-label">Detected gesture</div>
+      <div class="gesture-hero">
+        <span class="gesture-emoji" id="gestureEmoji">🖐️</span>
+        <div>
+          <div class="gesture-name" id="gestureName">No hand yet</div>
+          <div class="gesture-sub" id="gestureSub">Show a hand to the camera</div>
+        </div>
+      </div>
+      <div class="meter-row">
+        <span class="meter-label">Pinch</span>
+        <div class="meter"><div class="meter-fill" id="pinchFill"></div></div>
+        <span class="meter-value" id="pinchValue">0%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Fingers up</div>
+      <div class="fingers" id="fingers">
+        <div class="finger" data-finger="thumb"><span class="finger-dot"></span><span>Thumb</span></div>
+        <div class="finger" data-finger="index"><span class="finger-dot"></span><span>Index</span></div>
+        <div class="finger" data-finger="middle"><span class="finger-dot"></span><span>Middle</span></div>
+        <div class="finger" data-finger="ring"><span class="finger-dot"></span><span>Ring</span></div>
+        <div class="finger" data-finger="pinky"><span class="finger-dot"></span><span>Pinky</span></div>
+      </div>
+      <div class="stats-row">
+        <div class="stat"><span class="stat-value" id="handsValue">0</span><span class="stat-label">hands</span></div>
+        <div class="stat"><span class="stat-value" id="fingerValue">0</span><span class="stat-label">fingers up</span></div>
+        <div class="stat"><span class="stat-value" id="confValue">—</span><span class="stat-label">confidence</span></div>
+      </div>
+    </div>
+
+    <div class="card legend-card">
+      <div class="card-label">Gestures it recognises</div>
+      <ul class="legend" id="legend"></ul>
+    </div>
+  </aside>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
