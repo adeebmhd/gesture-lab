@@ -71,7 +71,8 @@ const RIGHT_BROW = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
 const LIPS_OUTER = [61, 185, 40, 39, 37, 0, 267, 269, 270, 409, 291, 375, 321, 405, 314, 17, 84, 181, 91, 146];
 const NOSE_LINE = [168, 6, 197, 195, 5, 4, 1, 2];
 
-const HAND_COLORS = ["#43e7f5", "#9b7bff"];
+const HAND_COLORS = ["#00DFD8", "#FF0080"];
+const SPECTRUM = ["#007CF0", "#00DFD8", "#7928CA", "#FF0080", "#F9CB28"];
 
 const GESTURE_LEGEND = [
   ["✊", "Fist"],
@@ -164,12 +165,13 @@ function pushHistory(emoji, name) {
   while (historyEl.children.length > 4) historyEl.lastElementChild.remove();
 }
 
+// Vercel spectrum accents, driven by the expression.
 const AURAS = {
-  happy: ["rgba(255, 196, 87, 0.22)", "rgba(255, 124, 156, 0.22)", "rgba(255, 231, 153, 0.1)"],
-  surprised: ["rgba(155, 123, 255, 0.3)", "rgba(67, 231, 245, 0.22)", "rgba(155, 123, 255, 0.1)"],
-  angry: ["rgba(255, 92, 92, 0.26)", "rgba(255, 124, 156, 0.2)", "rgba(255, 92, 92, 0.08)"],
-  kiss: ["rgba(255, 124, 156, 0.26)", "rgba(155, 123, 255, 0.18)", "rgba(255, 124, 156, 0.08)"],
-  calm: ["rgba(67, 231, 245, 0.18)", "rgba(155, 123, 255, 0.22)", "rgba(182, 255, 107, 0.08)"],
+  happy: ["#F9CB28", "#FF0080", "#F9CB28"],
+  surprised: ["#7928CA", "#00DFD8", "#007CF0"],
+  angry: ["#FF4D4D", "#FF0080", "#FF4D4D"],
+  kiss: ["#FF0080", "#7928CA", "#FF0080"],
+  calm: ["#007CF0", "#7928CA", "#00DFD8"],
 };
 
 function setAura(mood) {
@@ -374,13 +376,13 @@ function drawFaceMesh(landmarks) {
     ctx.restore();
   };
 
-  drawPath(FACE_OVAL, "#9b7bff", 0.35, 1.4, true);
-  drawPath(LEFT_EYE, "#43e7f5", 0.6, 1.6, true);
-  drawPath(RIGHT_EYE, "#43e7f5", 0.6, 1.6, true);
-  drawPath(LEFT_BROW, "#ff7c9c", 0.4, 1.4, false);
-  drawPath(RIGHT_BROW, "#ff7c9c", 0.4, 1.4, false);
-  drawPath(LIPS_OUTER, "#43e7f5", 0.45, 1.6, true);
-  drawPath(NOSE_LINE, "#dfe4ff", 0.22, 1.2, false);
+  drawPath(FACE_OVAL, "#7928CA", 0.75, 1.3, true);
+  drawPath(LEFT_EYE, "#00DFD8", 0.85, 1.5, true);
+  drawPath(RIGHT_EYE, "#00DFD8", 0.85, 1.5, true);
+  drawPath(LEFT_BROW, "#FF0080", 0.6, 1.3, false);
+  drawPath(RIGHT_BROW, "#FF0080", 0.6, 1.3, false);
+  drawPath(LIPS_OUTER, "#00DFD8", 0.7, 1.5, true);
+  drawPath(NOSE_LINE, "#EDEDED", 0.3, 1.1, false);
 
   ctx.save();
   ctx.fillStyle = "#ffffff";
@@ -456,14 +458,15 @@ function airDrawStep(landmarks, hand) {
 
   if (drawing) {
     if (lastDrawPoint) {
-      state.trailHue = (state.trailHue + 1.6) % 360;
+      state.trailHue = (state.trailHue + 1.2) % (SPECTRUM.length * 14);
+      const ink = SPECTRUM[Math.floor(state.trailHue / 14) % SPECTRUM.length];
       tctx.save();
-      tctx.strokeStyle = `hsl(${state.trailHue} 90% 62%)`;
+      tctx.strokeStyle = ink;
       tctx.lineWidth = 7;
       tctx.lineCap = "round";
       tctx.lineJoin = "round";
-      tctx.shadowColor = `hsl(${state.trailHue} 90% 62%)`;
-      tctx.shadowBlur = 14;
+      tctx.shadowColor = ink;
+      tctx.shadowBlur = 12;
       tctx.beginPath();
       tctx.moveTo(lastDrawPoint[0], lastDrawPoint[1]);
       tctx.lineTo(x, y);
@@ -472,7 +475,7 @@ function airDrawStep(landmarks, hand) {
 
       // Cursor ring so people see exactly where the ink lands.
       ctx.save();
-      ctx.strokeStyle = `hsl(${state.trailHue} 90% 70%)`;
+      ctx.strokeStyle = ink;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(x, y, 12, 0, Math.PI * 2);
@@ -487,7 +490,7 @@ function airDrawStep(landmarks, hand) {
 
 /* -------------------------------- Confetti -------------------------------- */
 
-const CONFETTI_COLORS = ["#43e7f5", "#9b7bff", "#b6ff6b", "#ff7c9c", "#ffd166"];
+const CONFETTI_COLORS = ["#007CF0", "#00DFD8", "#7928CA", "#FF0080", "#F9CB28"];
 
 function burstAt(landmarks) {
   const [x, y] = toCanvas(landmarks[9]);
@@ -742,7 +745,7 @@ function saveSnapshot() {
   shot.height = Math.round(rect.height * scale);
   const sctx = shot.getContext("2d");
 
-  sctx.fillStyle = "#06070d";
+  sctx.fillStyle = "#000000";
   sctx.fillRect(0, 0, shot.width, shot.height);
 
   const vw = video.videoWidth || 4;
@@ -767,12 +770,12 @@ function saveSnapshot() {
   sctx.drawImage(overlay, 0, 0, rect.width, rect.height);
   sctx.restore();
 
-  sctx.fillStyle = "rgba(6,7,13,0.72)";
+  sctx.fillStyle = "rgba(0,0,0,0.78)";
   sctx.fillRect(0, shot.height - 44, shot.width, 44);
-  sctx.fillStyle = "#eef1ff";
-  sctx.font = `${Math.round(14 * scale)}px Inter, system-ui, sans-serif`;
+  sctx.fillStyle = "#ededed";
+  sctx.font = `${Math.round(13 * scale)}px ui-monospace, SFMono-Regular, Menlo, monospace`;
   sctx.fillText(
-    `Gesture Lab · ${gestureName.textContent} · ${faceName.textContent}`,
+    `gesture lab  /  ${gestureName.textContent}  /  ${faceName.textContent}`,
     18 * scale,
     shot.height - 15 * scale
   );
